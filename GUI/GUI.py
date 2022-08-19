@@ -73,7 +73,8 @@ def loop():
             (n_sensor, value) = get_data(arduinoData.readline())
 
             if n_sensor == 1:
-                time_passed = (datetime.now()-start_time).total_seconds()
+                time_getData = datetime.now()
+                time_passed = (time_getData-start_time).total_seconds()
                 time_stamp = np.append(time_stamp, time_passed)
 
             if n_sensor == target_sensor:
@@ -84,7 +85,7 @@ def loop():
         
         with open(csv_file,'a', newline='') as f:
             w = csv.writer(f)
-            w.writerow(np.insert(current_data, 0, np.round(time_passed, decimals=2))) #adding the current time stamp to the front of the csv line
+            w.writerow(np.insert(current_data, 0, time_getData)) #adding the current time stamp to the front of the csv line
 
     
     fig.clf()
