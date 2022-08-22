@@ -18,8 +18,9 @@ target_wavelength_data = np.array([])
 target_sensor = 4
 time_stamp = np.array([])
 current_data = np.zeros(288,)
-calibration_set = np.zeros(288,) 
+ 
 csv_file = f"test{sample_no}.csv"
+time_getData = datetime.now()
 
 #state
 state_run = False
@@ -59,7 +60,7 @@ def get_data(income_data : bytes) -> tuple[int,int]:
     return sensor_number, sensor_reading
 
 def loop():
-    global time_stamp, current_data, target_wavelength_data, wavelength, state_run
+    global time_stamp, current_data, target_wavelength_data, wavelength, state_run, time_getData
     n_sensor = 0
     value = 0
 
@@ -77,8 +78,7 @@ def loop():
             if n_sensor == target_sensor:
                 target_wavelength_data = np.append(target_wavelength_data, value)
             current_data = np.append(current_data, value)
-        
-        current_data -= calibration_set
+    
         
         with open(csv_file,'a', newline='') as f:
             w = csv.writer(f)
@@ -103,26 +103,7 @@ def loop():
 
     canvas.draw()
     root.after(1,loop)
-    
-def calibration():
-    global calibration_set, state_run
-    
-    while arduinoData.in_waiting == 0:
-        pass
 
-    for _ in range(5): #change value for better calibration
-        nth_sensor = 0
-        place_holder = np.array([])
-        while nth_sensor != 288:
-            (nth_sensor, value) = get_data(arduinoData.readline())
-            place_holder = np.append(place_holder, value)
-            print(place_holder.size)
-        calibration_set += place_holder
-    
-    calibration_set /= 5.0 #change value for better calibration
-    calibration_set = np.round(calibration_set, decimals=2)
-    print(calibration_set)
-    #print calibration_set to csv for record 
 
 def new_sample():
     global time_stamp, current_data, target_wavelength_data, sample_no, state_run, csv_file, current_sample
@@ -156,10 +137,6 @@ def gui_start():
 current_sample = Label(text=f"Current Sample No.:{sample_no}")
 current_sample.pack(fill='x')
 
-"""
-button_calibration = Button(text = "CALIBRATION", command = calibration)
-button_calibration.pack()
-"""
 
 button_start = Button(text="START", command = gui_start)
 button_start.pack()
